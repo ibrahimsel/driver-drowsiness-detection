@@ -13,7 +13,7 @@ left_eye = mp_face_mesh.FACEMESH_LEFT_EYE
 right_eye = mp_face_mesh.FACEMESH_RIGHT_EYE
 denormalize_coordinates = mp_drawing._normalized_to_pixel_coordinates
 
-#                    sol üst   sağ alt
+#                    top left   bottom right
 roi_eye_left = [276, 285, 343, 346]
 
 forehead = [10]
