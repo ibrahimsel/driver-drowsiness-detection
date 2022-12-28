@@ -71,7 +71,7 @@ with mp_face_mesh.FaceMesh(
                 eye_roi = eye_roi / 255.0
                 eye_roi = np.expand_dims(eye_roi, axis=0)
                 prediction = model.predict(eye_roi)
-                if prediction < 0.5:
+                if prediction > 0.5:
                     cv2.putText(image, f"Eyes Open {prediction[0][0]:.2f}", f[10],
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
                     start_time = time.perf_counter()

@@ -15,6 +15,7 @@ denormalize_coordinates = mp_drawing._normalized_to_pixel_coordinates
 
 #                    top left   bottom right
 roi_eye_left = [276, 285, 343, 346]
+roi_eye_right = [46, 55, 188, 111]
 
 forehead = [10]
 
@@ -64,6 +65,12 @@ with mp_face_mesh.FaceMesh(
                     y = int(landmarks[index].y * image.shape[0])
                     e[index] = (x, y)
 
+                for index in roi_eye_right:
+                    x = int(landmarks[index].x * image.shape[1])
+                    y = int(landmarks[index].y * image.shape[0])
+                    e[index] = (x, y)
+                
+
                     """
                     -------------------------------------------
                     |                                         | 
@@ -85,7 +92,7 @@ with mp_face_mesh.FaceMesh(
                     ROI = image[y1:y2, x1:x2]
                     """
 
-                # 285 sol üst 346 sağ alt
+                # 285 top left 346 bottom right
                 cropped_left_eye = image[e[285][1]
                     :e[346][1], e[285][0]:e[346][0]]
 
@@ -122,6 +129,9 @@ with mp_face_mesh.FaceMesh(
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
                 for index in roi_eye_left:
+                    cv2.circle(image, e[index], 2, (255, 255, 255), -1)
+
+                for index in roi_eye_right:
                     cv2.circle(image, e[index], 2, (255, 255, 255), -1)
 
         cv2.imshow('Driver Drowsiness Detection', image)
