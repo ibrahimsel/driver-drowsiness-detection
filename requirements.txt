@@ -1,6 +1,6 @@
 tensorflow
 mediapipe
 numpy
-opencv-python
+opencv-python-headless
 playsound==1.2.2
 
