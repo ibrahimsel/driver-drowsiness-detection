@@ -41,8 +41,6 @@ with mp_face_mesh.FaceMesh(
         if not success:
             print("Ignoring empty camera frame.")
             continue
-        cv2.putText(image, "Press 'q' to quit", (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
         results = face_mesh.process(image)
 
