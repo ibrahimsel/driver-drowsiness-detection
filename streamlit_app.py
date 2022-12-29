@@ -4,7 +4,8 @@ import numpy as np
 import mediapipe as mp
 import streamlit as st
 import tensorflow as tf
-from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+import av
+from streamlit_webrtc import webrtc_streamer
 
 mp_drawing = mp.solutions.drawing_utils
 mp_face_mesh = mp.solutions.face_mesh
@@ -19,15 +20,12 @@ model = tf.keras.models.load_model('models/CNN-163216-80k.h5')
 st.title("Drowsiness Detection")
 st.write("This is a simple drowsiness detection app using mediapipe and tensorflow.")
 
-class VideoTransformer(VideoTransformerBase):
-    def __init__(self):
-        self.start_time = 0
-        self.drowsy_time = 0
 
-    def transform(self, frame):
-        image = frame.to_ndarray(format="bgr24")
 
-        with mp_face_mesh.FaceMesh(
+def video_frame_callback(frame):
+    image = frame.to_ndarray(format="bgr24")
+
+    with mp_face_mesh.FaceMesh(
                 static_image_mode=True,
                 max_num_faces=1,
                 refine_landmarks=True,
@@ -70,24 +68,25 @@ class VideoTransformer(VideoTransformerBase):
                         if prediction > 0.5:
                             cv2.putText(image, f"Eyes Open {prediction[0][0]:.2f}", f[10],
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-                            self.start_time = time.perf_counter()
-                            self.drowsy_time = 0
+                            start_time = time.perf_counter()
+                            drowsy_time = 0
+
                         else:
                             cv2.putText(image, f"Eyes Closed {prediction[0][0]:.2f}", f[10],
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                             end_time = time.perf_counter()
-                            self.drowsy_time += end_time - self.start_time
-                            self.start_time = end_time
+                            drowsy_time += end_time - start_time
+                            start_time = end_time
 
-                        if self.drowsy_time > 2:
+                        if drowsy_time > 1:
                             cv2.putText(image, "DROWSINESS ALERT!", (10, 200),
                                         cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 0, 255), 2)
                             # playsound(alarm_sound)
-                        elif self.drowsy_time > 0 and self.drowsy_time < 2:
+                        elif drowsy_time > 0 and drowsy_time < 1:
                             cv2.putText(image, "BLINK", (10, 200),
                                         cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2)
 
-                        cv2.putText(image, f"Drowsy Time: {self.drowsy_time:.2f}", (10, 400),
+                        cv2.putText(image, f"Drowsy Time: {drowsy_time:.2f}", (10, 400),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
                         for index in roi_eye_left:
@@ -95,7 +94,6 @@ class VideoTransformer(VideoTransformerBase):
 
                         for index in roi_eye_right:
                             cv2.circle(image, e[index], 2, (255, 255, 255), -1)
+    return av.VideoFrame.from_ndarray(image, format="bgr24")
 
-        return image
-
-webrtc_streamer(key="example", video_transformer_factory=VideoTransformer)
+webrtc_streamer(key="example", video_frame_callback=video_frame_callback)
