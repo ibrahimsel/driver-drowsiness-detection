@@ -40,6 +40,7 @@ with mp_face_mesh.FaceMesh(
         success, image = cap.read()
         if not success:
             print("Ignoring empty camera frame.")
+            time.sleep(1)
             continue
 
         results = face_mesh.process(image)
