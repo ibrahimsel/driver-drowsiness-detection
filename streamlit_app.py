@@ -7,18 +7,12 @@ import tensorflow as tf
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
 
 mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
 mp_face_mesh = mp.solutions.face_mesh
-
-denormalize_coordinates = mp_drawing._normalized_to_pixel_coordinates
 
 roi_eye_left = [276, 285, 343, 346]
 roi_eye_right = [46, 55, 188, 111]
 
 forehead = [10]
-
-
-drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
 model = tf.keras.models.load_model('models/CNN-163216-80k.h5')
 
@@ -39,7 +33,6 @@ class VideoTransformer(VideoTransformerBase):
                 refine_landmarks=True,
                 min_detection_confidence=0.5,
                 min_tracking_confidence=0.5) as face_mesh:
-
 
                 results = face_mesh.process(image)
 
@@ -63,7 +56,6 @@ class VideoTransformer(VideoTransformerBase):
                             x = int(landmarks[index].x * image.shape[1])
                             y = int(landmarks[index].y * image.shape[0])
                             e[index] = (x, y)
-
 
                         # 285 top left 346 bottom right
                         cropped_left_eye = image[e[285][1]:e[346][1], e[285][0]:e[346][0]]
@@ -91,7 +83,6 @@ class VideoTransformer(VideoTransformerBase):
                             cv2.putText(image, "DROWSINESS ALERT!", (10, 200),
                                         cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 0, 255), 2)
                             # playsound(alarm_sound)
-
                         elif self.drowsy_time > 0 and self.drowsy_time < 2:
                             cv2.putText(image, "BLINK", (10, 200),
                                         cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2)
@@ -106,6 +97,5 @@ class VideoTransformer(VideoTransformerBase):
                             cv2.circle(image, e[index], 2, (255, 255, 255), -1)
 
         return image
-
 
 webrtc_streamer(key="example", video_transformer_factory=VideoTransformer)

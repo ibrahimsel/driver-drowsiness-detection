@@ -6,12 +6,10 @@ import tensorflow as tf
 from playsound import playsound
 
 mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
 mp_face_mesh = mp.solutions.face_mesh
 
 left_eye = mp_face_mesh.FACEMESH_LEFT_EYE
 right_eye = mp_face_mesh.FACEMESH_RIGHT_EYE
-denormalize_coordinates = mp_drawing._normalized_to_pixel_coordinates
 
 #                    top left   bottom right
 roi_eye_left = [276, 285, 343, 346]
@@ -21,16 +19,12 @@ forehead = [10]
 
 start_time = 0
 drowsy_time = 0
-# Specifications for drawing the lines
-drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
 model = tf.keras.models.load_model('models/CNN-163216-80k.h5')
 alarm_sound = 'alarm_sound.mp3'
 
 cv2.namedWindow('Driver Drowsiness Detection', cv2.WINDOW_NORMAL)
 cv2.resizeWindow('Driver Drowsiness Detection', 640, 480)
-
-drowsy_time = 0
 
 cap = cv2.VideoCapture(0)
 with mp_face_mesh.FaceMesh(
@@ -124,7 +118,6 @@ with mp_face_mesh.FaceMesh(
                     cv2.putText(image, "BLINK", (10, 200),
                                 cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2)
 
-                # print drowsy_time
                 cv2.putText(image, f"Drowsy Time: {drowsy_time:.2f}", (10, 400),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
