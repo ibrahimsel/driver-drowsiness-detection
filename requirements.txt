@@ -1,7 +1,4 @@
-mediapipe==0.9.0.1
-numpy==1.24.0
-opencv_contrib_python_headless
-playsound==1.2.2
+mediapipe
+numpy
+opencv_contrib_python
 streamlit==1.16.0
-tensorflow
-tensorflow_gpu

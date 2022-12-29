@@ -2,7 +2,6 @@ import cv2
 import time
 import numpy as np
 import mediapipe as mp
-import tensorflow as tf
 import streamlit as st
 
 mp_drawing = mp.solutions.drawing_utils
