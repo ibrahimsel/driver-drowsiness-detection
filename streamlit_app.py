@@ -29,7 +29,7 @@ st.write("This is a simple drowsiness detection app using mediapipe and tensorfl
 run = st.checkbox('Run')
 FRAME_WINDOW = st.image([])
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(-1)
 with mp_face_mesh.FaceMesh(
         static_image_mode=True,
         max_num_faces=1,
