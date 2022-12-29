@@ -4,4 +4,5 @@ opencv_contrib_python==4.6.0.66
 playsound==1.2.2
 streamlit==1.16.0
 tensorflow==2.11.0
+tensorflow_estimator==2.11.0
 tensorflow_gpu==2.10.1
