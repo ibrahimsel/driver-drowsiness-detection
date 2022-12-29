@@ -96,7 +96,6 @@ class VideoTransformer(VideoTransformerBase):
                             cv2.putText(image, "BLINK", (10, 200),
                                         cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2)
 
-                        # print self.drowsy_time
                         cv2.putText(image, f"Drowsy Time: {self.drowsy_time:.2f}", (10, 400),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 

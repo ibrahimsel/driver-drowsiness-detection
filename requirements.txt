@@ -4,3 +4,4 @@ opencv-python-headless
 streamlit==1.16.0
 tensorflow
 tensorflow_gpu
+streamlit_webrtc
