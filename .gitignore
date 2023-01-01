@@ -1,6 +1,5 @@
 /data
 /data-trimmed
-a.py
 RandomForest_Classifier.ipynb
 models/CNN-326432.h5
 models/RandomForest.pkl
