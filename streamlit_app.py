@@ -1,99 +1,63 @@
 import cv2
-import time
 import numpy as np
 import mediapipe as mp
 import streamlit as st
 import tensorflow as tf
-import av
-from streamlit_webrtc import webrtc_streamer
 
 mp_drawing = mp.solutions.drawing_utils
 mp_face_mesh = mp.solutions.face_mesh
 
 roi_eye_left = [276, 285, 343, 346]
-roi_eye_right = [46, 55, 188, 111]
-
-forehead = [10]
 
 model = tf.keras.models.load_model('models/CNN-163216-80k.h5')
 
-st.title("Drowsiness Detection")
-st.write("This is a simple drowsiness detection app using mediapipe and tensorflow.")
+st.title("Uyku Hali Tespiti")
 
+uploaded_file = st.file_uploader("Lütfen bir fotoğraf yükleyiniz", type=["jpg", "jpeg", "png"])
 
-
-def video_frame_callback(frame):
-    image = frame.to_ndarray(format="bgr24")
+if uploaded_file is not None:
+    st.image(uploaded_file, caption='Yüklenen fotoğraf', use_column_width=True)
+    image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)
+    image = cv2.imdecode(image, 1)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     with mp_face_mesh.FaceMesh(
-                static_image_mode=True,
-                max_num_faces=1,
-                refine_landmarks=True,
-                min_detection_confidence=0.5,
-                min_tracking_confidence=0.5) as face_mesh:
+        static_image_mode=True,
+        max_num_faces=1,
+        refine_landmarks=True,
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5) as face_mesh:
+        results = face_mesh.process(image)
 
-                results = face_mesh.process(image)
+        annotated_image = image.copy()
+        if results.multi_face_landmarks:
+            for face in results.multi_face_landmarks:
+                landmarks = face.landmark
 
-                if results.multi_face_landmarks:
-                    for face in results.multi_face_landmarks:
-                        landmarks = face.landmark
+                e = {}
+                for index in roi_eye_left:
+                    x = int(landmarks[index].x * image.shape[1])
+                    y = int(landmarks[index].y * image.shape[0])
+                    e[index] = (x, y)
 
-                        f = {}
-                        for index in forehead:
-                            x = int(landmarks[index].x * image.shape[1])
-                            y = int(landmarks[index].y * image.shape[0])
-                            f[index] = (x, y)
+                cropped_eye_left = annotated_image[e[285][1]
+                    :e[346][1], e[285][0]:e[346][0]]
 
-                        e = {}
-                        for index in roi_eye_left:
-                            x = int(landmarks[index].x * image.shape[1])
-                            y = int(landmarks[index].y * image.shape[0])
-                            e[index] = (x, y)
+                eye_roi = cv2.resize(cropped_eye_left, (256, 256))
+                eye_roi = eye_roi / 255.0
+                eye_roi = np.expand_dims(eye_roi, axis=0)
+                prediction = model.predict(eye_roi)
+                
+                if prediction > 0.5:
+                    status = "Uyku yok (Gözler Açık)"
+                else:
+                    status = "Uykulu (Gözler Kapalı)"
+                st.write(f"Tahmin: {status}")
 
-                        for index in roi_eye_right:
-                            x = int(landmarks[index].x * image.shape[1])
-                            y = int(landmarks[index].y * image.shape[0])
-                            e[index] = (x, y)
+        else:
+            st.write("Yüz tespit edilemedi. Yüz hatları belirgin bir fotoğraf yükleyiniz")
+else:
+    st.write("Lütfen bir fotoğraf yükleyiniz")
 
-                        # 285 top left 346 bottom right
-                        cropped_left_eye = image[e[285][1]:e[346][1], e[285][0]:e[346][0]]
 
-                        if cropped_left_eye.size == 0:
-                            continue
-                        eye_roi = cv2.resize(cropped_left_eye, (256, 256))
-                        eye_roi = eye_roi / 255.0
-                        eye_roi = np.expand_dims(eye_roi, axis=0)
-                        prediction = model.predict(eye_roi)
-
-                        if prediction > 0.5:
-                            cv2.putText(image, f"Eyes Open {prediction[0][0]:.2f}", f[10],
-                                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-                            start_time = time.perf_counter()
-                            drowsy_time = 0
-
-                        else:
-                            cv2.putText(image, f"Eyes Closed {prediction[0][0]:.2f}", f[10],
-                                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                            end_time = time.perf_counter()
-                            drowsy_time += end_time - start_time
-                            start_time = end_time
-
-                        if drowsy_time > 1:
-                            cv2.putText(image, "DROWSINESS ALERT!", (10, 200),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 0, 255), 2)
-                            # playsound(alarm_sound)
-                        elif drowsy_time > 0 and drowsy_time < 1:
-                            cv2.putText(image, "BLINK", (10, 200),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2)
-
-                        cv2.putText(image, f"Drowsy Time: {drowsy_time:.2f}", (10, 400),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
-                        for index in roi_eye_left:
-                            cv2.circle(image, e[index], 2, (255, 255, 255), -1)
-
-                        for index in roi_eye_right:
-                            cv2.circle(image, e[index], 2, (255, 255, 255), -1)
-    return av.VideoFrame.from_ndarray(image, format="bgr24")
-
-webrtc_streamer(key="example", video_frame_callback=video_frame_callback)
+                
