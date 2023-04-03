@@ -1,6 +1,6 @@
 # Drowsiness Detection
 
-### To use the app: Clone the project. Open the terminal and `cd` into the project folder. Then run `python ./DDD_Main.py` or `python3 ./DDD_Main.py` depending on your OS and Python version
+### To use the app: Clone the project. Open the terminal and `cd` into the project folder. Then run `python ./DDD_Main.py` or `python3 ./DDD_Main.py` depending on your OS and Python version. Use `pip install -r /path/to/requirements.txt` to install dependencies
 ---
 ### This repo contains 2 apps:
 - `DDD_Main.py`: OpenCV app. This app takes live input from webcam, tracks the face and eyes and sends an audible feedback if the user's eyes has been closed for more than a second. 
